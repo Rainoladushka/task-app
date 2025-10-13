@@ -4,6 +4,7 @@ import com.example.taskapp.model.Notification;
 import com.example.taskapp.repository.NotificationRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class NotificationService {
@@ -11,14 +12,6 @@ public class NotificationService {
 
     public NotificationService(NotificationRepository notificationRepository) {
         this.notificationRepository = notificationRepository;
-        addTestData();
-    }
-
-    private void addTestData() {
-        Notification notification = new Notification();
-        notification.setMessage("Welcome to Task App!");
-        notification.setUserId(1L);
-        notificationRepository.save(notification);
     }
 
     public List<Notification> getUserNotifications(Long userId) {
@@ -27,11 +20,7 @@ public class NotificationService {
 
     public List<Notification> getPendingNotifications(Long userId) {
         return notificationRepository.findByUserId(userId).stream()
-                .filter(notification -> !notification.isRead())
-                .toList();
-    }
-
-    public Notification createNotification(Notification notification) {
-        return notificationRepository.save(notification);
+                .filter(notification -> !notification.isSent()) // ← важно!
+                .collect(Collectors.toList());
     }
 }
