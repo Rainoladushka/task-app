@@ -28,4 +28,7 @@ public class InMemoryNotificationRepository implements NotificationRepository {
                 .filter(notification -> notification.getUserId().equals(userId))
                 .toList();
     }
+    public void clear() {
+        notifications.clear();
+    }
 }

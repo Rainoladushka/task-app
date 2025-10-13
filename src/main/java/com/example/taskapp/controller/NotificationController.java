@@ -22,8 +22,4 @@ public class NotificationController {
     public List<Notification> getPendingNotifications(@PathVariable Long userId) {
         return notificationService.getPendingNotifications(userId);
     }
-    @PostMapping
-    public Notification createNotification(@RequestBody Notification notification) {
-        return notificationService.createNotification(notification);
-    }
 }

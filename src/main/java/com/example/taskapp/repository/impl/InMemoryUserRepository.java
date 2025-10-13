@@ -4,6 +4,7 @@ import com.example.taskapp.model.User;
 import com.example.taskapp.repository.UserRepository;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
+
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -24,12 +25,8 @@ public class InMemoryUserRepository implements UserRepository {
 
     @Override
     public User findByUsername(String username) {
-        if (username == null) {
-            return null;
-        }
         return users.values().stream()
-                .filter(user -> user.getUsername() != null)
-                .filter(user -> user.getUsername().equals(username))
+                .filter(user -> username.equals(user.getUsername()))
                 .findFirst()
                 .orElse(null);
     }
@@ -39,4 +36,8 @@ public class InMemoryUserRepository implements UserRepository {
         return Optional.ofNullable(users.get(id));
     }
 
+    @Override
+    public List<User> findAll() {
+        return new ArrayList<>(users.values());
+    }
 }
