@@ -20,7 +20,7 @@ public class NotificationService {
     }
 
     public List<Notification> getPendingNotifications(Long userId) {
-        return notificationRepository.findPendingByUserId(userId);
+        return notificationRepository.findByUserIdAndSentFalse(userId);
     }
 
     public Notification createNotification(String message, Long userId) {

@@ -7,6 +7,7 @@ import com.example.taskapp.repository.jpa.JpaTaskRepository;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TaskService {
@@ -29,6 +30,11 @@ public class TaskService {
     }
 
     public void deleteTask(Long taskId) {
-        taskRepository.markAsDeleted(taskId);
+        Optional<Task> taskOpt = taskRepository.findById(taskId);
+        if (taskOpt.isPresent()) {
+            Task task = taskOpt.get();
+            task.setDeleted(true);
+            taskRepository.save(task);
+        }
     }
 }
