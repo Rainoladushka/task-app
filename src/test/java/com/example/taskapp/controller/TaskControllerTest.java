@@ -23,7 +23,7 @@ class TaskControllerTest {
     private TaskController taskController;
 
     @Test
-    void getUserTasks_ShouldReturnTasks() {
+    void getUserTasks_ShouldReturnUserTasks() {
         TaskController controller = new TaskController(taskService);
         Task task = new Task();
         task.setTitle("Test Task");
@@ -33,7 +33,7 @@ class TaskControllerTest {
 
         assertEquals(1, result.size());
         assertEquals("Test Task", result.get(0).getTitle());
-        }
+    }
 
     @Test
     void getPendingTasks_ShouldReturnPendingTasks() {

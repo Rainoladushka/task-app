@@ -7,8 +7,8 @@ import org.springframework.stereotype.Repository;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
-@Repository
-@Profile("inmemory")
+//@Repository
+//@Profile("inmemory")
 public class InMemoryNotificationRepository implements NotificationRepository {
     private final Map<Long, Notification> notifications = new HashMap<>();
     private final AtomicLong idCounter = new AtomicLong(1);
@@ -30,5 +30,18 @@ public class InMemoryNotificationRepository implements NotificationRepository {
     }
     public void clear() {
         notifications.clear();
+    }
+
+    @Override
+    public List<Notification> findPendingByUserId(Long userId) {
+        return notifications.values().stream()
+                .filter(notification -> userId.equals(notification.getUserId()))
+                .filter(notification -> !notification.isSent())
+                .toList();
+    }
+
+    @Override
+    public List<Notification> findAll() {
+        return new ArrayList<>(notifications.values());
     }
 }

@@ -1,30 +1,27 @@
 package com.example.taskapp.service;
 
 import com.example.taskapp.model.User;
-import com.example.taskapp.repository.UserRepository;
+import com.example.taskapp.repository.jpa.JpaUserRepository;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
-    private final UserRepository userRepository;
+    private final JpaUserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(JpaUserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     public User registerUser(User user) {
-        if (user.getUsername() == null || user.getUsername().trim().isEmpty()) {
-            throw new IllegalArgumentException("Username cannot be null or empty");
+        if (userRepository.existsByUsername(user.getUsername())) {
+            throw new RuntimeException("Username already exists");
         }
         return userRepository.save(user);
     }
 
     public User findByUsername(String username) {
-        User user = userRepository.findByUsername(username);
-        if (user == null) {
-            return null;
-        }
-        return user;
+        return userRepository.findByUsername(username)
+                .orElse(null);
     }
 }
-

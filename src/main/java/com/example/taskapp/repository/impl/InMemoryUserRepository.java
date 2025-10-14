@@ -8,8 +8,8 @@ import org.springframework.stereotype.Repository;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
-@Repository
-@Profile("inmemory")
+//@Repository
+//@Profile("inmemory")
 public class InMemoryUserRepository implements UserRepository {
     private final Map<Long, User> users = new HashMap<>();
     private final AtomicLong idCounter = new AtomicLong(1);
