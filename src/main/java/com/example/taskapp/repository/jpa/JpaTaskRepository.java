@@ -8,12 +8,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public interface JpaTaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByUserIdAndDeletedFalse(Long userId);
     List<Task> findByUserIdAndStatusAndDeletedFalse(Long userId, TaskStatus status);
+    List<Task> findByTargetDateBeforeAndStatusAndDeletedFalse(LocalDateTime targetDate, TaskStatus status);
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Task t SET t.deleted = true WHERE t.id = :id")
