@@ -1,5 +1,7 @@
 package com.example.taskapp.service;
 
+import com.example.taskapp.config.RabbitMQConfig;
+import com.example.taskapp.messaging.TaskCreatedMessage;
 import com.example.taskapp.model.Task;
 import com.example.taskapp.model.TaskStatus;
 import com.example.taskapp.repository.jpa.JpaTaskRepository;
@@ -9,6 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +24,9 @@ class TaskServiceTest {
 
     @InjectMocks
     private TaskService taskService;
+
+    @Mock
+    private RabbitTemplate rabbitTemplate;
 
     @Mock
     private JpaTaskRepository taskRepository;
@@ -80,6 +87,11 @@ class TaskServiceTest {
         assertEquals("New Task", result.getTitle());
         assertTrue(result.getId() > 0);
         verify(taskRepository).save(taskToCreate);
+        verify(rabbitTemplate).convertAndSend(
+                eq(RabbitMQConfig.EXCHANGE_TASK),
+                eq(RabbitMQConfig.ROUTING_KEY_TASK_CREATED),
+                any(TaskCreatedMessage.class)
+        );
     }
 
     @Test

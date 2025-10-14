@@ -1,6 +1,14 @@
 version: '3.8'
 
 services:
+    rabbitmq:
+        image: rabbitmq:3.13-management-alpine
+        ports:
+          - "5672:5672"
+          - "15672:15672"
+        environment:
+          RABBITMQ_DEFAULT_USER: guest
+          RABBITMQ_DEFAULT_PASS:
   redis:
     image: redis:7-alpine
     ports:
@@ -22,8 +30,9 @@ services:
     ports:
       - "8081:8081"
     depends_on:
-      - redis
-      - db
+          - rabbitmq
+          - redis
+          - db
     environment:
       SPRING_PROFILES_ACTIVE=docker
       SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/taskapp
@@ -32,6 +41,10 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO=none
       SPRING_DATA_REDIS_HOST=redis
       SPRING_DATA_REDIS_PORT=6379
+      SPRING_RABBITMQ_HOST=rabbitmq
+      SPRING_RABBITMQ_PORT=5672
+      SPRING_RABBITMQ_USERNAME=guest
+      SPRING_RABBITMQ_PASSWORD=
 
 volumes:
   postgres_
