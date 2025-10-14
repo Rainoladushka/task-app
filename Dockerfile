@@ -1,14 +1,37 @@
-# Stage 1: Build the application with Maven
-FROM maven:3.9.6-eclipse-temurin-21 AS build
-WORKDIR /app
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
-COPY src ./src
-RUN mvn clean package -DskipTests
+version: '3.8'
 
-# Stage 2: Run the application
-FROM openjdk:21-jdk-slim
-WORKDIR /app
-COPY --from=build /app/target/task-app-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: taskapp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD:
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_/var/lib/postgresql/data
+
+  app:
+    build: .
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+      - db
+    environment:
+      SPRING_PROFILES_ACTIVE=docker
+      SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/taskapp
+      SPRING_DATASOURCE_USERNAME=postgres
+      SPRING_DATASOURCE_PASSWORD=
+      SPRING_JPA_HIBERNATE_DDL_AUTO=none
+      SPRING_DATA_REDIS_HOST=redis
+      SPRING_DATA_REDIS_PORT=6379
+
+volumes:
+  postgres_
