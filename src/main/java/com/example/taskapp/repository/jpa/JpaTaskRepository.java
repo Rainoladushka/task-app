@@ -15,7 +15,7 @@ public interface JpaTaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByUserIdAndDeletedFalse(Long userId);
     List<Task> findByUserIdAndStatusAndDeletedFalse(Long userId, TaskStatus status);
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(clearAutomatically = true) // ← Вот это добавь
     @Query("UPDATE Task t SET t.deleted = true WHERE t.id = :id")
     void markAsDeleted(@Param("id") Long id);
 }

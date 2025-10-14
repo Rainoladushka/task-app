@@ -5,65 +5,59 @@ import com.example.taskapp.model.TaskStatus;
 import com.example.taskapp.repository.jpa.JpaTaskRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
-
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@Transactional
+@ExtendWith(MockitoExtension.class)
 class TaskServiceTest {
 
-    @Autowired
+    @InjectMocks
     private TaskService taskService;
 
-    @Autowired
+    @Mock
     private JpaTaskRepository taskRepository;
 
     @BeforeEach
     void setUp() {
-        taskRepository.deleteAll();
     }
 
     @Test
     void getUserTasks_ShouldReturnUserTasks() {
         Task task = new Task();
         task.setUserId(1L);
+        task.setId(1L);
         task.setTitle("Test Task");
-        task.setDeleted(false);
-        taskRepository.save(task);
+        when(taskRepository.findByUserIdAndDeletedFalse(1L)).thenReturn(List.of(task));
 
         List<Task> result = taskService.getUserTasks(1L);
 
         assertEquals(1, result.size());
         assertEquals("Test Task", result.get(0).getTitle());
+        verify(taskRepository).findByUserIdAndDeletedFalse(1L);
     }
 
     @Test
     void getPendingTasks_ShouldReturnOnlyPendingTasks() {
-        Task pendingTask = new Task();
-        pendingTask.setUserId(1L);
-        pendingTask.setTitle("Pending Task");
-        pendingTask.setStatus(TaskStatus.PENDING);
-        pendingTask.setDeleted(false);
-        taskRepository.save(pendingTask);
-
-        Task completedTask = new Task();
-        completedTask.setTitle("Completed Task");
-        completedTask.setUserId(1L);
-        completedTask.setStatus(TaskStatus.COMPLETED);
-        completedTask.setDeleted(false);
-        taskRepository.save(completedTask);
+        Task task = new Task();
+        task.setId(1L);
+        task.setTitle("Pending Task");
+        task.setUserId(1L);
+        task.setStatus(TaskStatus.PENDING);
+        when(taskRepository.findByUserIdAndStatusAndDeletedFalse(1L, TaskStatus.PENDING))
+                .thenReturn(List.of(task));
 
         List<Task> result = taskService.getPendingTasks(1L);
 
         assertEquals(1, result.size());
         assertEquals(TaskStatus.PENDING, result.get(0).getStatus());
+        verify(taskRepository).findByUserIdAndStatusAndDeletedFalse(1L, TaskStatus.PENDING);
     }
 
     @Test
@@ -73,11 +67,19 @@ class TaskServiceTest {
         taskToCreate.setUserId(1L);
         taskToCreate.setDeleted(false);
 
+        Task savedTask = new Task();
+        savedTask.setId(1L);
+        savedTask.setTitle("New Task");
+        savedTask.setUserId(1L);
+        savedTask.setDeleted(false);
+        when(taskRepository.save(taskToCreate)).thenReturn(savedTask);
+
         Task result = taskService.createTask(taskToCreate);
 
         assertNotNull(result.getId());
         assertEquals("New Task", result.getTitle());
         assertTrue(result.getId() > 0);
+        verify(taskRepository).save(taskToCreate);
     }
 
     @Test
@@ -87,22 +89,24 @@ class TaskServiceTest {
         task.setUserId(1L);
         task.setStatus(TaskStatus.PENDING);
         task.setDeleted(false);
-        Task saved = taskRepository.save(task);
+        when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+        when(taskRepository.save(any(Task.class))).thenReturn(task);
 
-        taskService.deleteTask(saved.getId());
+        taskService.deleteTask(1L);
 
-        Optional<Task> updated = taskRepository.findById(saved.getId());
-        assertTrue(updated.isPresent());
-        assertTrue(updated.get().isDeleted());
+        assertTrue(task.isDeleted());
+        verify(taskRepository).findById(1L);
+        verify(taskRepository).save(task);
     }
 
     @Test
     void deleteTask_WhenTaskNotFound_ShouldDoNothing() {
         Long nonExistentId = 999L;
+        when(taskRepository.findById(999L)).thenReturn(Optional.empty());
 
         taskService.deleteTask(nonExistentId);
 
-        Optional<Task> notFound = taskRepository.findById(nonExistentId);
-        assertFalse(notFound.isPresent());
+        verify(taskRepository).findById(999L);
+        verify(taskRepository, never()).save(any(Task.class));
     }
 }

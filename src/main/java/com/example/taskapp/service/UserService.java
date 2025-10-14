@@ -2,7 +2,6 @@ package com.example.taskapp.service;
 
 import com.example.taskapp.model.User;
 import com.example.taskapp.repository.jpa.JpaUserRepository;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 @Service
