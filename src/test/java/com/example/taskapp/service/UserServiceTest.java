@@ -1,18 +1,26 @@
 package com.example.taskapp.service;
 
 import com.example.taskapp.model.User;
-import com.example.taskapp.repository.impl.InMemoryUserRepository;
+import com.example.taskapp.repository.jpa.JpaUserRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@Transactional
 class UserServiceTest {
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private JpaUserRepository userRepository;
 
     @Test
     void registerUser_ShouldSaveAndReturnUser() {
-        var userRepository = new InMemoryUserRepository();
-        var userService = new UserService(userRepository);
-
         User userToSave = new User();
         userToSave.setUsername("testuser");
         userToSave.setEmail("test@example.com");
@@ -25,11 +33,9 @@ class UserServiceTest {
 
     @Test
     void findByUsername_ShouldReturnUser() {
-        var userRepository = new InMemoryUserRepository();
-        var userService = new UserService(userRepository);
-
         User user = new User();
         user.setUsername("john");
+        user.setEmail("john@test.com");
         userRepository.save(user);
 
         User result = userService.findByUsername("john");
@@ -40,9 +46,6 @@ class UserServiceTest {
 
     @Test
     void findByUsername_WhenUserNotFound_ShouldReturnNull() {
-        var userRepository = new InMemoryUserRepository();
-        var userService = new UserService(userRepository);
-
         User result = userService.findByUsername("unknown");
 
         assertNull(result);

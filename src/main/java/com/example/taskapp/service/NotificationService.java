@@ -1,16 +1,17 @@
 package com.example.taskapp.service;
 
 import com.example.taskapp.model.Notification;
-import com.example.taskapp.repository.NotificationRepository;
+import com.example.taskapp.repository.jpa.JpaNotificationRepository;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class NotificationService {
-    private final NotificationRepository notificationRepository;
+    private final JpaNotificationRepository notificationRepository;
 
-    public NotificationService(NotificationRepository notificationRepository) {
+    public NotificationService(JpaNotificationRepository notificationRepository) {
         this.notificationRepository = notificationRepository;
     }
 
@@ -19,8 +20,11 @@ public class NotificationService {
     }
 
     public List<Notification> getPendingNotifications(Long userId) {
-        return notificationRepository.findByUserId(userId).stream()
-                .filter(notification -> !notification.isSent()) // ← важно!
-                .collect(Collectors.toList());
+        return notificationRepository.findPendingByUserId(userId);
+    }
+
+    public Notification createNotification(String message, Long userId) {
+        Notification notification = new Notification(message, userId);
+        return notificationRepository.save(notification);
     }
 }

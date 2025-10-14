@@ -1,18 +1,44 @@
 package com.example.taskapp.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "tasks")
 public class Task {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private String title;
+
     private String description;
-    private Long userId;
+
+    @Enumerated(EnumType.STRING)
     private TaskStatus status = TaskStatus.PENDING;
-    private boolean deleted = false;
-    private LocalDateTime creationDate;
+
+    @Column(name = "creation_date")
+    private LocalDateTime creationDate = LocalDateTime.now();
+
+    @Column(name = "target_date")
     private LocalDateTime targetDate;
 
-    public Task() {
+    private boolean deleted = false;
+
+    @Column(name = "user_id")
+    private Long userId;
+
+    public Task() {}
+
+    public Task(String title, Long userId) {
+        if (title == null || title.trim().isEmpty()) {
+            throw new IllegalArgumentException("Title cannot be null or empty");
+        }
+        this.title = title;
+        this.userId = userId;
+        this.status = TaskStatus.PENDING;
+        this.deleted = false;
         this.creationDate = LocalDateTime.now();
     }
 

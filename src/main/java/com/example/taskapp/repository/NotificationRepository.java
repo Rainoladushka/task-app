@@ -6,6 +6,8 @@ import java.util.List;
 public interface NotificationRepository {
     Notification save(Notification notification);
     List<Notification> findByUserId(Long userId);
+    List<Notification> findPendingByUserId(Long userId);
+    List<Notification> findAll();
     void clear();
 }
 

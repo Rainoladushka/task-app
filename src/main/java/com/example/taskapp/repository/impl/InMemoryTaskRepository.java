@@ -7,8 +7,8 @@ import org.springframework.stereotype.Repository;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
-@Repository
-@Profile("inmemory")
+//@Repository
+//@Profile("inmemory")
 public class InMemoryTaskRepository implements TaskRepository {
     private final Map<Long, Task> tasks = new HashMap<>();
     private final AtomicLong idCounter = new AtomicLong(1);
