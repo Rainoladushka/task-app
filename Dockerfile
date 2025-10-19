@@ -1,50 +1,12 @@
-version: '3.8'
+FROM maven:3.9.6-eclipse-temurin-21 AS build
+WORKDIR /app
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+COPY src ./src
+RUN mvn clean package -DskipTests
 
-services:
-    rabbitmq:
-        image: rabbitmq:3.13-management-alpine
-        ports:
-          - "5672:5672"
-          - "15672:15672"
-        environment:
-          RABBITMQ_DEFAULT_USER: guest
-          RABBITMQ_DEFAULT_PASS:
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-
-  db:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_DB: taskapp
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD:
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_/var/lib/postgresql/data
-
-  app:
-    build: .
-    ports:
-      - "8081:8081"
-    depends_on:
-          - rabbitmq
-          - redis
-          - db
-    environment:
-      SPRING_PROFILES_ACTIVE=docker
-      SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/taskapp
-      SPRING_DATASOURCE_USERNAME=postgres
-      SPRING_DATASOURCE_PASSWORD=
-      SPRING_JPA_HIBERNATE_DDL_AUTO=none
-      SPRING_DATA_REDIS_HOST=redis
-      SPRING_DATA_REDIS_PORT=6379
-      SPRING_RABBITMQ_HOST=rabbitmq
-      SPRING_RABBITMQ_PORT=5672
-      SPRING_RABBITMQ_USERNAME=guest
-      SPRING_RABBITMQ_PASSWORD=
-
-volumes:
-  postgres_
+FROM openjdk:21-jdk-slim
+WORKDIR /app
+COPY --from=build /app/target/task-app-0.0.1-SNAPSHOT.jar app.jar
+EXPOSE 8081
+ENTRYPOINT ["java", "-jar", "app.jar"]
